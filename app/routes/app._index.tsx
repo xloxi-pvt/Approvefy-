@@ -1,3 +1,4 @@
+/// <reference path="../../env.d.ts" />
 import type { LoaderFunctionArgs } from "react-router";
 import { useLoaderData, useNavigate, Link } from "react-router";
 import {
@@ -21,7 +22,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
   const [formsCount, hasSettings] = await Promise.all([
     prisma.formConfig.count({ where: { shop } }),
-    prisma.appSettings.findUnique({ where: { shop }, select: { id: true } }).then((r) => !!r),
+    prisma.appSettings.findUnique({ where: { shop }, select: { id: true } }).then((r: { id: string } | null) => !!r),
   ]);
 
   const storeHandle = shop.replace(/\.myshopify\.com$/i, "");

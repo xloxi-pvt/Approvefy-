@@ -5,6 +5,7 @@
     "**/*.tsx",
     ".react-router/types/**/*"
   ],
+  "exclude": ["node_modules"],
   "compilerOptions": {
     "lib": [
       "DOM",
@@ -25,10 +26,7 @@
     "moduleResolution": "Bundler",
     "target": "ES2022",
     "baseUrl": ".",
-    "types": [
-      "@react-router/node",
-      "vite/client"
-    ],
+    "types": ["react", "react-dom", "node", "vite/client"],
     "rootDirs": [
       ".",
       "./.react-router/types"
