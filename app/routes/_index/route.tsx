@@ -7,8 +7,11 @@ import styles from "./styles.module.css";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
+  const shop = url.searchParams.get("shop");
+  const host = url.searchParams.get("host");
 
-  if (url.searchParams.get("shop")) {
+  // Redirect to app when opened from Shopify admin (embed sends shop and/or host)
+  if (shop || host) {
     throw redirect(`/app?${url.searchParams.toString()}`);
   }
 
