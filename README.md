@@ -145,12 +145,15 @@ Prisma session table does not exist.
 
 **Fix:**
 
-1. **Local:** Run the `setup` script: `npm run setup` (or `yarn` / `pnpm`). This runs `prisma generate` and `prisma migrate deploy`.
-2. **Production (e.g. Vercel + Supabase):** Ensure migrations have been applied to your **production** database. Either:
-   - In your project root, set `DATABASE_URL` (and `DIRECT_URL` if needed) to your production DB, then run:  
-     `npx prisma migrate deploy`  
-   - Or run the same from a CI step / one-off script that has access to production `DATABASE_URL`.  
-   After the Session table exists, redeploy the app and try again.
+1. **Local:** Run `npm run setup` (or `npm run db:migrate`) so the Session table exists in the DB pointed to by your `.env`.
+2. **Vercel (production):** The app must use the **same** database as the one where you ran migrations.
+   - In **Vercel** → your project → **Settings** → **Environment Variables**, add (or fix):
+     - `DATABASE_URL` = your Supabase **connection string** (e.g. `postgresql://postgres:PASSWORD@db.xxx.supabase.co:5432/postgres`).
+     - `DIRECT_URL` = same Supabase **direct** connection string (often the same as `DATABASE_URL` for Supabase; use port 5432).
+   - If you use a **different** Supabase project for production, run migrations against that DB first:
+     - Set `DATABASE_URL` and `DIRECT_URL` in `.env` to the **production** Supabase URLs.
+     - Run: `npm run db:migrate` (or `npx prisma migrate deploy`).
+   - **Redeploy** the app on Vercel after changing env vars so the runtime uses the correct DB.
 
 ### Navigating/redirecting breaks an embedded app
 
