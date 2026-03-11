@@ -9,10 +9,12 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
   const shop = url.searchParams.get("shop");
   const host = url.searchParams.get("host");
+  const fromShopifyAdmin = request.headers.get("Referer")?.includes("admin.shopify.com");
 
-  // Redirect to app when opened from Shopify admin (embed sends shop and/or host)
-  if (shop || host) {
-    throw redirect(`/app?${url.searchParams.toString()}`);
+  // Redirect to app when opened from Shopify admin (embed sends shop/host) or when referer is admin
+  if (shop || host || fromShopifyAdmin) {
+    const query = url.searchParams.toString();
+    throw redirect(query ? `/app?${query}` : "/app");
   }
 
   return { showForm: Boolean(login) };
