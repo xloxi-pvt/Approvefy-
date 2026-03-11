@@ -152,12 +152,11 @@ Prisma session table does not exist.
      - `DIRECT_URL` = same Supabase **direct** connection (same as above; use port 5432).
    - Ensure these vars are available at **build time** (Vercel exposes them during Build by default when the env is selected).
    - **Redeploy** (trigger a new deployment) after saving env vars so the build runs again and migrations apply.
-   - The **start** script also runs `prisma migrate deploy` before serving, so the first cold start on Vercel can create the Session table if the build step didn’t.
-   - **If the error still persists:** run migrations once from your machine against the production DB (use the same URLs as in Vercel env):
+   - **If the error persists** (e.g. build cannot reach the DB): run migrations once from your machine against the production DB:
      ```bash
-     DATABASE_URL="postgresql://..." DIRECT_URL="postgresql://..." npx prisma migrate deploy
+     DATABASE_URL="postgresql://postgres:PASSWORD@db.xxx.supabase.co:5432/postgres" DIRECT_URL="postgresql://postgres:PASSWORD@db.xxx.supabase.co:5432/postgres" npx prisma migrate deploy
      ```
-     Or use the helper script: `node scripts/migrate-production.js` (after setting `DATABASE_URL` and `DIRECT_URL`). Then redeploy.
+     Then redeploy (no need to run migrations in build again; the DB already has the tables).
 
 ### Navigating/redirecting breaks an embedded app
 
