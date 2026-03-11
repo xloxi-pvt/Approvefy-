@@ -2,21 +2,21 @@
 
 client_id = "545e0ef18b011f1555e5494f147210d9"
 name = "Approvefy"
-application_url = "https://example.com"
+application_url = "https://approvefy-app.vercel.app"
 embedded = true
 
 [webhooks]
-api_version = "2026-04"
+api_version = "2026-01"
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
 scopes = "read_customers,read_locales,write_app_proxy,write_customers,write_products"
 
 [auth]
-redirect_urls = [ "https://example.com/api/auth" ]
+redirect_urls = [ "https://approvefy-app.vercel.app/api/auth" ]
 
 [app_proxy]
-url = "https://example.com/api"
+url = "https://approvefy-app.vercel.app/api"
 subpath = "customer-approval"
 prefix = "apps"
 
