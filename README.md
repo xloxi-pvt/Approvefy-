@@ -129,15 +129,28 @@ When you reach the step for [setting up environment variables](https://shopify.d
 
 ## Gotchas / Troubleshooting
 
-### Database tables don't exist
+### Database tables don't exist / Prisma session table does not exist
 
-If you get an error like:
+If you get errors like:
 
 ```
 The table `main.Session` does not exist in the current database.
 ```
+or (on Vercel/production):
+```
+Prisma session table does not exist.
+```
 
-Create the database for Prisma. Run the `setup` script in `package.json` using `npm`, `yarn` or `pnpm`.
+**Cause:** The `Session` table (and other Prisma models) have not been created in the database.
+
+**Fix:**
+
+1. **Local:** Run the `setup` script: `npm run setup` (or `yarn` / `pnpm`). This runs `prisma generate` and `prisma migrate deploy`.
+2. **Production (e.g. Vercel + Supabase):** Ensure migrations have been applied to your **production** database. Either:
+   - In your project root, set `DATABASE_URL` (and `DIRECT_URL` if needed) to your production DB, then run:  
+     `npx prisma migrate deploy`  
+   - Or run the same from a CI step / one-off script that has access to production `DATABASE_URL`.  
+   After the Session table exists, redeploy the app and try again.
 
 ### Navigating/redirecting breaks an embedded app
 
