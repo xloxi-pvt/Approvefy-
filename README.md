@@ -146,14 +146,17 @@ Prisma session table does not exist.
 **Fix:**
 
 1. **Local:** Run `npm run setup` (or `npm run db:migrate`) so the Session table exists in the DB pointed to by your `.env`.
-2. **Vercel (production):** The app must use the **same** database as the one where you ran migrations.
-   - In **Vercel** → your project → **Settings** → **Environment Variables**, add (or fix):
+2. **Vercel (production):** The build runs `prisma migrate deploy`, so the Session table is created during deploy **if** the build can reach your DB.
+   - In **Vercel** → your project → **Settings** → **Environment Variables**, add for **Production** (and **Preview** if you use branch deploys):
      - `DATABASE_URL` = your Supabase **connection string** (e.g. `postgresql://postgres:PASSWORD@db.xxx.supabase.co:5432/postgres`).
-     - `DIRECT_URL` = same Supabase **direct** connection string (often the same as `DATABASE_URL` for Supabase; use port 5432).
-   - If you use a **different** Supabase project for production, run migrations against that DB first:
-     - Set `DATABASE_URL` and `DIRECT_URL` in `.env` to the **production** Supabase URLs.
-     - Run: `npm run db:migrate` (or `npx prisma migrate deploy`).
-   - **Redeploy** the app on Vercel after changing env vars so the runtime uses the correct DB.
+     - `DIRECT_URL` = same Supabase **direct** connection (same as above; use port 5432).
+   - Ensure these vars are available at **build time** (Vercel exposes them during Build by default when the env is selected).
+   - **Redeploy** (trigger a new deployment) after saving env vars so the build runs again and migrations apply.
+   - **If the error persists** (e.g. build cannot reach the DB): run migrations once from your machine against the production DB:
+     ```bash
+     DATABASE_URL="postgresql://postgres:PASSWORD@db.xxx.supabase.co:5432/postgres" DIRECT_URL="postgresql://postgres:PASSWORD@db.xxx.supabase.co:5432/postgres" npx prisma migrate deploy
+     ```
+     Then redeploy (no need to run migrations in build again; the DB already has the tables).
 
 ### Navigating/redirecting breaks an embedded app
 
