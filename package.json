@@ -4,6 +4,7 @@
   "scripts": {
     "build": "react-router build",
     "dev": "node scripts/dev.cjs",
+    "dev:b2b": "npx prisma generate && shopify app dev --config=shopify.app.customer-b2b.toml --theme-app-extension-port 9295",
     "config:link": "shopify app config link",
     "generate": "shopify app generate",
     "deploy": "shopify app deploy",
