@@ -127,17 +127,7 @@ When you're ready to set up your app in production, you can follow [our deployme
 
 When you reach the step for [setting up environment variables](https://shopify.dev/docs/apps/deployment/web#set-env-vars), you also need to set the variable `NODE_ENV=production`.
 
-**Vercel (or any host):** Set `SHOPIFY_APP_URL` to your app’s public URL (e.g. `https://approvefy-app.vercel.app`). If this is missing, the embedded app can show a blank page because auth and redirect URLs are built from it.
-
 ## Gotchas / Troubleshooting
-
-### Blank app page when opening in Shopify admin
-
-If the app opens as a blank white page inside the admin:
-
-1. **Set `SHOPIFY_APP_URL`** in your host’s env (e.g. Vercel) to your app URL, e.g. `https://approvefy-app.vercel.app` (no trailing slash). Auth and redirects depend on this.
-2. In [Shopify Partner Dashboard](https://partners.shopify.com) → your app → **Configuration**, ensure **App URL** and **Allowed redirection URL(s)** match that same URL (e.g. redirect `https://approvefy-app.vercel.app/api/auth`).
-3. Redeploy after changing env vars, then try opening the app again (or reinstall the app on the store if the session was created with the wrong URL).
 
 ### Database tables don't exist
 

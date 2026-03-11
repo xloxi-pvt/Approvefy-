@@ -9,39 +9,14 @@ import { authenticate } from "../shopify.server";
 import "../styles/layout.css";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const appUrl = process.env.SHOPIFY_APP_URL?.trim();
-  if (!appUrl) {
-    return {
-      apiKey: process.env.SHOPIFY_API_KEY || "",
-      configError: true as const,
-      message: "SHOPIFY_APP_URL is not set in your deployment (e.g. Vercel). Set it to your app URL (e.g. https://approvefy-app.vercel.app) and redeploy.",
-    };
-  }
   await authenticate.admin(request);
-  return { apiKey: process.env.SHOPIFY_API_KEY || "", configError: false as const };
+  return { apiKey: process.env.SHOPIFY_API_KEY || "" };
 };
 
 export default function App() {
-  const { apiKey, configError, message } = useLoaderData<typeof loader>();
+  const { apiKey } = useLoaderData<typeof loader>();
   const navigation = useNavigation();
   const fetchers = useFetchers();
-
-  if (configError && message) {
-    return (
-      <div style={{
-        padding: 24,
-        maxWidth: 560,
-        margin: "40px auto",
-        fontFamily: "system-ui, sans-serif",
-        background: "#fef3c7",
-        border: "1px solid #f59e0b",
-        borderRadius: 8,
-      }}>
-        <h2 style={{ margin: "0 0 12px", color: "#92400e" }}>App configuration needed</h2>
-        <p style={{ margin: 0, color: "#78350f", lineHeight: 1.5 }}>{message}</p>
-      </div>
-    );
-  }
 
   const isLoading =
     navigation.state === "loading" ||
