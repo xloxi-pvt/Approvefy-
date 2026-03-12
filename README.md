@@ -182,6 +182,31 @@ Prisma session table does not exist.
      ```
      Then redeploy.
 
+### 401 Unauthorized when opening the app in Shopify Admin
+
+If you see **401 Unauthorized** when opening the app in admin (e.g. `admin.shopify.com/store/.../apps/approvefy-2`):
+
+**Cause:** The server (e.g. Vercel) is using a different app’s credentials than the app installed on the store, or the app is not installed so there is no session.
+
+**Fix:**
+
+1. **Use one app config for the deployed app**  
+   You have multiple `shopify.app.*.toml` files with different `client_id` values. The store installs one app (one `client_id`). Your deployed app must use that **same** app’s credentials:
+   - **SHOPIFY_API_KEY** = `client_id` from the toml of the app that is installed on the store (e.g. from `shopify.app.approvefy.toml` or `shopify.app.customer-b2b.toml`).
+   - **SHOPIFY_API_SECRET** = Client secret for that same app (Partners → App → Client credentials).
+   - **SCOPES** = Same scopes as in that toml, comma-separated (e.g. `read_customers,write_customers,write_products,read_locales,write_app_proxy`).
+   - **SHOPIFY_APP_URL** = App URL for that app (e.g. `https://approvefy-app.vercel.app`).
+
+2. **Set env vars where the app runs**  
+   - **Local:** Put the above in `.env` (see `.env.example`).
+   - **Vercel:** Project → Settings → Environment Variables. Add the same for Production (and Preview if needed). Redeploy after changing.
+
+3. **Ensure the app is actually installed**  
+   If the Partners dashboard shows **Installs: 0**, install the app on your dev store: open the app link from the dashboard or run `shopify app dev` and complete the install flow. Until the app is installed, there is no session, so you will get 401.
+
+4. **Match the app you open in admin**  
+   The app you open in admin (e.g. “approvefy-2”) must be the same app whose `client_id` and secret you set as `SHOPIFY_API_KEY` and `SHOPIFY_API_SECRET` on the server.
+
 ### Navigating/redirecting breaks an embedded app
 
 Embedded apps must maintain the user session, which can be tricky inside an iFrame. To avoid issues:
