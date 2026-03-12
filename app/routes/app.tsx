@@ -1,7 +1,6 @@
 import type { HeadersFunction, LoaderFunctionArgs } from "react-router";
 import {
   Outlet,
-  redirect,
   useLoaderData,
   useRouteError,
   useNavigation,
@@ -16,24 +15,7 @@ import { authenticate } from "../shopify.server";
 import "../styles/layout.css";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  try {
-    await authenticate.admin(request);
-  } catch (error) {
-    if (error instanceof Response && error.status === 401) {
-      const url = new URL(request.url);
-      const shop =
-        url.searchParams.get("shop") ??
-        request.headers.get("x-shopify-shop-domain");
-
-      if (shop) {
-        throw redirect(`/auth/login?shop=${encodeURIComponent(shop)}`);
-      }
-
-      throw redirect("/auth/login");
-    }
-
-    throw error;
-  }
+  await authenticate.admin(request);
 
   return { apiKey: process.env.SHOPIFY_API_KEY || "" };
 };

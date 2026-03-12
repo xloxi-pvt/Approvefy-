@@ -8,5 +8,7 @@ import { redirect } from "react-router";
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
   const query = url.searchParams.toString();
-  throw redirect(query ? `/auth?${query}` : "/auth");
+  // shopifyApp(authPathPrefix: "/auth") expects the OAuth callback at /auth/callback
+  // (and the install/login entrypoint at /auth).
+  throw redirect(query ? `/auth/callback?${query}` : "/auth");
 };
