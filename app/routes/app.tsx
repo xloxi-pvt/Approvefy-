@@ -28,6 +28,8 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       if (shop) {
         throw redirect(`/auth/login?shop=${encodeURIComponent(shop)}`);
       }
+
+      throw redirect("/auth/login");
     }
 
     throw error;

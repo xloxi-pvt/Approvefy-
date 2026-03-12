@@ -20,10 +20,21 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { session } = await authenticate.admin(request);
   const shop = session.shop;
 
-  const [formsCount, hasSettings] = await Promise.all([
-    prisma.formConfig.count({ where: { shop } }),
-    prisma.appSettings.findUnique({ where: { shop }, select: { id: true } }).then((r: { id: string } | null) => !!r),
-  ]);
+  let formsCount = 0;
+  let hasSettings = false;
+  let dbUnavailable = false;
+
+  try {
+    [formsCount, hasSettings] = await Promise.all([
+      prisma.formConfig.count({ where: { shop } }),
+      prisma.appSettings
+        .findUnique({ where: { shop }, select: { id: true } })
+        .then((r: { id: string } | null) => !!r),
+    ]);
+  } catch (error) {
+    dbUnavailable = true;
+    console.error("[Home] Failed to load setup data:", error);
+  }
 
   const storeHandle = shop.replace(/\.myshopify\.com$/i, "");
   const themeEditorUrl = `https://admin.shopify.com/store/${storeHandle}/themes/current/editor?context=apps`;
@@ -35,6 +46,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     themeEditorUrl,
     formsCount,
     hasSettings,
+    dbUnavailable,
     setupTasksComplete,
     setupTasksTotal,
   };
@@ -45,6 +57,7 @@ export default function Index() {
     themeEditorUrl,
     formsCount,
     hasSettings,
+    dbUnavailable,
     setupTasksComplete,
     setupTasksTotal,
   } = useLoaderData<typeof loader>();
@@ -73,6 +86,21 @@ export default function Index() {
         </div>
 
         <Box paddingBlockEnd="400">
+          {dbUnavailable && (
+            <LegacyCard sectioned>
+              <BlockStack gap="200">
+                <Text as="p" tone="critical" fontWeight="semibold">
+                  Database connection issue detected
+                </Text>
+                <Text as="p" variant="bodySm" tone="subdued">
+                  We could not load setup data from the database. Please verify
+                  your production `DATABASE_URL` (Supabase pooler on port 6543
+                  with `?pgbouncer=true`) and `DIRECT_URL` (direct port 5432),
+                  then redeploy.
+                </Text>
+              </BlockStack>
+            </LegacyCard>
+          )}
           <LegacyCard sectioned>
             <BlockStack gap="400">
               <Text as="h2" variant="headingMd" fontWeight="bold">Setup guide</Text>
