@@ -2,7 +2,7 @@
   "name": "approvefy",
   "private": true,
   "scripts": {
-    "build": "prisma generate && prisma migrate deploy && react-router build",
+    "build": "prisma generate && react-router build",
     "dev": "node scripts/dev.cjs",
     "dev:b2b": "npx prisma generate && shopify app dev --config=shopify.app.customer-b2b.toml --theme-app-extension-port 9295",
     "config:link": "shopify app config link",
@@ -10,7 +10,7 @@
     "deploy": "shopify app deploy",
     "config:use": "shopify app config use",
     "env": "shopify app env",
-    "start": "react-router-serve ./build/server/index.js",
+    "start": "prisma migrate deploy && react-router-serve ./build/server/index.js",
     "docker-start": "npm run setup && npm run start",
     "setup": "prisma generate && prisma migrate deploy",
     "db:migrate": "prisma migrate deploy",
