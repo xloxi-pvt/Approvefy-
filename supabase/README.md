@@ -15,8 +15,8 @@ cp .env.example .env
 
 Edit `.env` and set:
 
-- `DATABASE_URL` – from Supabase: **Project Settings → Database → Connection string (URI)**
-- `DIRECT_URL` – same URI (or use the “Direct connection” string for migrations)
+- `DATABASE_URL` – for **local dev** use the direct URI (port 5432). For **production/serverless** (e.g. Shopify hosting) use the **Transaction pooler** URI (port 6543) from **Project Settings → Database → Connect → Connection pooling → Transaction**, and add `?pgbouncer=true` to the end.
+- `DIRECT_URL` – always the **direct** connection (port 5432); used by Prisma for migrations only.
 
 ## 2. Apply the schema
 

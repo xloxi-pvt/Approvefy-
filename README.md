@@ -129,6 +129,30 @@ When you reach the step for [setting up environment variables](https://shopify.d
 
 ## Gotchas / Troubleshooting
 
+### Can't reach database server (Supabase on Shopify / serverless)
+
+If you see:
+
+```
+Can't reach database server at db.xxx.supabase.co:5432
+MissingSessionTableError: Prisma session table does not exist.
+```
+
+**Cause:** The app runs in a serverless environment (e.g. Shopify’s hosting) where direct Postgres port **5432** is not reachable. Supabase’s **connection pooler** (port **6543**) is required for the app at runtime.
+
+**Fix:**
+
+1. In **Supabase**: **Project Settings** → **Database** → **Connect** → under **Connection pooling** choose **Transaction** (port 6543). Copy the URI.
+2. Add `?pgbouncer=true` to that URI (required for Prisma with the pooler).
+3. In your **production** env (e.g. Shopify app env vars or your host’s dashboard), set:
+   - **DATABASE_URL** = the **pooler** URI (port 6543, with `?pgbouncer=true`).
+   - **DIRECT_URL** = the **direct** URI (port 5432), used only for running migrations.
+4. Run migrations from a place that can reach port 5432 (e.g. your machine):  
+   `npx prisma migrate deploy`  
+   Then redeploy the app.
+
+Keep `DIRECT_URL` as the direct connection in `.env`; use the pooler URL for `DATABASE_URL` only in production.
+
 ### Database tables don't exist / Prisma session table does not exist
 
 If you get errors like:
@@ -141,19 +165,20 @@ or (on Vercel/production):
 Prisma session table does not exist.
 ```
 
-**Cause:** The `Session` table (and other Prisma models) have not been created in the database.
+**Cause:** The `Session` table (and other Prisma models) have not been created in the database, or the app cannot reach the DB (see “Can't reach database server” above).
 
 **Fix:**
 
 1. **Local:** Run `npm run setup` (or `npm run db:migrate`) so the Session table exists in the DB pointed to by your `.env`.
 2. **Vercel (production):** The build runs `prisma migrate deploy`, so the Session table is created during deploy **if** the build can reach your DB.
    - In **Vercel** → your project → **Settings** → **Environment Variables**, add for **Production** (and **Preview** if you use branch deploys):
-     - `DATABASE_URL` = your Postgres **connection string** (e.g. `postgresql://postgres:PASSWORD@db.xxx.supabase.co:5432/postgres`).
-   - Ensure it’s available at **build time** (Vercel exposes it during Build when the env is selected).
+     - `DATABASE_URL` = your Postgres **connection string** (use the **pooler** URL for serverless; see “Can't reach database server” above).
+     - `DIRECT_URL` = direct connection (port 5432) for migrations.
+   - Ensure they’re available at **build time** (Vercel exposes them during Build when the env is selected).
    - **Redeploy** after saving so the build runs again and migrations apply.
    - **If the error persists** (e.g. build cannot reach the DB): run migrations once from your machine against the production DB:
      ```bash
-     DATABASE_URL="postgresql://..." npx prisma migrate deploy
+     DIRECT_URL="postgresql://..." npx prisma migrate deploy
      ```
      Then redeploy.
 
