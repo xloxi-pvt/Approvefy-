@@ -1,5 +1,12 @@
 import type { HeadersFunction, LoaderFunctionArgs } from "react-router";
-import { Outlet, useLoaderData, useRouteError, useNavigation, useFetchers } from "react-router";
+import {
+  Outlet,
+  redirect,
+  useLoaderData,
+  useRouteError,
+  useNavigation,
+  useFetchers,
+} from "react-router";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { AppProvider } from "@shopify/shopify-app-react-router/react";
 import { AppProvider as PolarisAppProvider } from "@shopify/polaris";
@@ -9,7 +16,23 @@ import { authenticate } from "../shopify.server";
 import "../styles/layout.css";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  await authenticate.admin(request);
+  try {
+    await authenticate.admin(request);
+  } catch (error) {
+    if (error instanceof Response && error.status === 401) {
+      const url = new URL(request.url);
+      const shop =
+        url.searchParams.get("shop") ??
+        request.headers.get("x-shopify-shop-domain");
+
+      if (shop) {
+        throw redirect(`/auth/login?shop=${encodeURIComponent(shop)}`);
+      }
+    }
+
+    throw error;
+  }
+
   return { apiKey: process.env.SHOPIFY_API_KEY || "" };
 };
 
