@@ -148,15 +148,14 @@ Prisma session table does not exist.
 1. **Local:** Run `npm run setup` (or `npm run db:migrate`) so the Session table exists in the DB pointed to by your `.env`.
 2. **Vercel (production):** The build runs `prisma migrate deploy`, so the Session table is created during deploy **if** the build can reach your DB.
    - In **Vercel** → your project → **Settings** → **Environment Variables**, add for **Production** (and **Preview** if you use branch deploys):
-     - `DATABASE_URL` = your Supabase **connection string** (e.g. `postgresql://postgres:PASSWORD@db.xxx.supabase.co:5432/postgres`).
-     - `DIRECT_URL` = same Supabase **direct** connection (same as above; use port 5432).
-   - Ensure these vars are available at **build time** (Vercel exposes them during Build by default when the env is selected).
-   - **Redeploy** (trigger a new deployment) after saving env vars so the build runs again and migrations apply.
+     - `DATABASE_URL` = your Postgres **connection string** (e.g. `postgresql://postgres:PASSWORD@db.xxx.supabase.co:5432/postgres`).
+   - Ensure it’s available at **build time** (Vercel exposes it during Build when the env is selected).
+   - **Redeploy** after saving so the build runs again and migrations apply.
    - **If the error persists** (e.g. build cannot reach the DB): run migrations once from your machine against the production DB:
      ```bash
-     DATABASE_URL="postgresql://postgres:PASSWORD@db.xxx.supabase.co:5432/postgres" DIRECT_URL="postgresql://postgres:PASSWORD@db.xxx.supabase.co:5432/postgres" npx prisma migrate deploy
+     DATABASE_URL="postgresql://..." npx prisma migrate deploy
      ```
-     Then redeploy (no need to run migrations in build again; the DB already has the tables).
+     Then redeploy.
 
 ### Navigating/redirecting breaks an embedded app
 
